@@ -1,3 +1,5 @@
+require "pry"
+
 class Board
   @win_or_draw = false
 
@@ -18,24 +20,37 @@ class Board
       player_turn(cross)
       break if @win_or_draw
       player_turn(circle)
-      p @board_marks
     end
   end
 
   def player_turn(player_turn)
     input = player_turn.get_player_input
     write_move_to_board(input, player_turn.mark)
-    check_winning_position?(player_turn.mark)
-    puts @board
+    check_win(player_turn.mark)
   end
 
-  def check_winning_position?(mark)
-    @board_marks.each do |row, list|
-      if list.all? { |symbol| symbol == mark }
-        puts "\nPlayer #{mark} won!"
-        @win_or_draw = true
-        break
-      end
+  def check_win(mark)
+    rows = []
+    @board_marks.each { |row, list| rows.concat(list) }
+
+    winning_positions = [
+      [rows[0] == mark && rows[1] == mark && rows[2] == mark],
+      [rows[3] == mark && rows[4] == mark && rows[5] == mark],
+      [rows[6] == mark && rows[7] == mark && rows[8] == mark],
+      [rows[0] == mark && rows[3] == mark && rows[6] == mark],
+      [rows[1] == mark && rows[4] == mark && rows[7] == mark],
+      [rows[2] == mark && rows[5] == mark && rows[8] == mark],
+      [rows[0] == mark && rows[4] == mark && rows[8] == mark],
+      [rows[2] == mark && rows[4] == mark && rows[6] == mark]
+    ]
+    
+    check_winning_position?(winning_positions)
+  end
+
+  def check_winning_position?(positions)
+    if positions.any? { |position| position[0] == true }
+      puts "\nPlayer #{mark} won!"
+      @win_or_draw = true
     end
   end
 
