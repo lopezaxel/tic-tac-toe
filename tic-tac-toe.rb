@@ -18,20 +18,59 @@ class Board
   def start_game(cross, circle)
     until @win_or_draw
       player_turn(cross)
-      break if @win_or_draw
       player_turn(circle)
+      if @win_or_draw
+        user_answer = ask_player_restart_game()
+        restart_game() if user_answer
+        break unless user_answer
+      end
     end
   end
 
+  def ask_player_restart_game
+    print "\nType \"yes\" to restart the game: "
+    user_answer = gets.chomp
+    user_answer == "yes"
+  end
+
+  def restart_game
+    initialize
+    @win_or_draw = false
+  end
+
   def player_turn(player_turn)
+    return if @win_or_draw
+    
     input = player_turn.get_player_input
     write_move_to_board(input, player_turn.mark)
-    check_win(player_turn.mark)
+
+    if check_draw()
+      @win_or_draw = true 
+      puts "\nDraw!\n"
+    elsif check_win(player_turn.mark)
+      @win_or_draw = true
+      puts "\nPlayer #{player_turn.mark} won!" if @win_or_draw
+    end
+
+    puts @board
+  end
+
+  def check_draw
+    rows = flatten_board_hash
+    @board_marks.each { |row, list| rows.concat(list) }
+
+    rows.all? { |position| position != " " }
+  end
+
+  def flatten_board_hash
+    rows = []
+    @board_marks.each { |row, list| rows.concat(list) }
+
+    rows
   end
 
   def check_win(mark)
-    rows = []
-    @board_marks.each { |row, list| rows.concat(list) }
+    rows = flatten_board_hash
 
     winning_positions = [
       [rows[0] == mark && rows[1] == mark && rows[2] == mark],
@@ -44,14 +83,7 @@ class Board
       [rows[2] == mark && rows[4] == mark && rows[6] == mark]
     ]
     
-    check_winning_position?(winning_positions)
-  end
-
-  def check_winning_position?(positions)
-    if positions.any? { |position| position[0] == true }
-      puts "\nPlayer #{mark} won!"
-      @win_or_draw = true
-    end
+    winning_positions.any? { |position| position[0] == true }
   end
 
   def write_move_to_board(play, mark)
