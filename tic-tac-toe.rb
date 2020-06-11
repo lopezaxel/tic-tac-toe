@@ -47,21 +47,34 @@ class Board
 
   def player_turn(player_turn)
     return if @win_or_draw
-    
-    input = player_turn.get_player_input
-    write_move_to_board(input, player_turn.mark) unless check_invalid_move(input)
-    check_game_state()
 
-    puts @board
+    begin
+      input = player_turn.get_player_input
+      if check_invalid_move(input)
+        while check_invalid_move(input)
+          puts "\nInvalid move!"
+          input = player_turn.get_player_input
+        end
+      end      
+    rescue => exception
+      puts "Invalid input"
+      retry
+    end
+    
+
+    write_move_to_board(input, player_turn.mark)
+    check_game_state(player_turn.mark)
+
+    puts "\n#{@board}\n"
   end
 
-  def check_game_state
+  def check_game_state(player_mark)
     if check_draw()
       @win_or_draw = true 
       puts "\nDraw!\n"
-    elsif check_win(player_turn.mark)
+    elsif check_win(player_mark)
       @win_or_draw = true
-      puts "\nPlayer #{player_turn.mark} won!" if @win_or_draw
+      puts "\nPlayer #{player_mark} won!" if @win_or_draw
     end
   end
 
