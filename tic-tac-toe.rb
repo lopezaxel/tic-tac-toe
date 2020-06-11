@@ -19,10 +19,17 @@ class Board
     until @win_or_draw
       player_turn(cross)
       player_turn(circle)
-      if @win_or_draw
-        user_answer = ask_player_restart_game()
-        restart_game() if user_answer
-        break unless user_answer
+      check_if_restart_or_finish_game()
+    end
+  end
+
+  def check_if_restart_or_finish_game
+    if @win_or_draw
+      user_answer = ask_player_restart_game()
+      if user_answer
+        restart_game()
+      else
+        win_or_draw = false
       end
     end
   end
@@ -34,7 +41,7 @@ class Board
   end
 
   def restart_game
-    initialize
+    initialize()
     @win_or_draw = false
   end
 
@@ -42,8 +49,13 @@ class Board
     return if @win_or_draw
     
     input = player_turn.get_player_input
-    write_move_to_board(input, player_turn.mark)
+    write_move_to_board(input, player_turn.mark) unless check_invalid_move(input)
+    check_game_state()
 
+    puts @board
+  end
+
+  def check_game_state
     if check_draw()
       @win_or_draw = true 
       puts "\nDraw!\n"
@@ -51,8 +63,6 @@ class Board
       @win_or_draw = true
       puts "\nPlayer #{player_turn.mark} won!" if @win_or_draw
     end
-
-    puts @board
   end
 
   def check_draw
@@ -92,6 +102,10 @@ class Board
     join_rows()
 
     @board = "#{@row1}\n#{@row2}\n#{@row3}"
+  end
+
+  def check_invalid_move(play)
+    @board_marks["row#{play[0]}".to_sym][play[1]] != " "
   end
   
   def join_rows
