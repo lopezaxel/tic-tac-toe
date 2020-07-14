@@ -1,5 +1,3 @@
-require "pry"
-
 class Board
   @win_or_draw = false
 
