@@ -1,4 +1,8 @@
+require 'pry'
+
 class Board
+  attr_accessor :board_marks
+
   @win_or_draw = false
 
   def initialize
@@ -60,7 +64,7 @@ class Board
     end
     
 
-    write_move_to_board(input, player_turn.mark)
+    write_move(input, player_turn.mark)
     check_game_state(player_turn.mark)
 
     puts "\n#{@board}\n"
@@ -83,9 +87,9 @@ class Board
     rows.all? { |position| position != " " }
   end
 
-  def flatten_board_hash
+  def flatten_board_hash(board_marks = @board_marks)
     rows = []
-    @board_marks.each { |row, list| rows.concat(list) }
+    board_marks.each { |row, list| rows.concat(list) }
 
     rows
   end
@@ -107,7 +111,7 @@ class Board
     winning_positions.any? { |position| position[0] == true }
   end
 
-  def write_move_to_board(play, mark)
+  def write_move(play, mark)
     @board_marks["row#{play[0]}".to_sym][play[1]] = mark
 
     join_rows()
@@ -159,5 +163,5 @@ end
 board = Board.new
 cross = Cross.new("x")
 circle = Circle.new("o")
+#board.start_game(cross, circle)
 
-board.start_game(cross, circle)
